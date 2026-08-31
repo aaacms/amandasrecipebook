@@ -1,0 +1,88 @@
+{
+  "title": "Professional Baker Teaches You How To Make CHOCOLATE CHIP COOKIES!",
+  "source": {
+    "url": "https://www.youtube.com/watch?v=uJwekkbGPns",
+    "author": "Oh Yum with Anna Olson",
+    "platform": "youtube"
+  },
+  "servings": {
+    "value": 24,
+    "source": "estimated"
+  },
+  "prep_time_minutes": {
+    "value": 75,
+    "source": "estimated"
+  },
+  "cook_time_minutes": {
+    "value": 18,
+    "source": "estimated"
+  },
+  "category": {
+    "value": "dessert",
+    "source": "estimated"
+  },
+  "ingredients": [
+    {
+      "name": "unsalted butter",
+      "quantity": "1/2 cup (115 g)",
+      "unit": null
+    },
+    {
+      "name": "packed light brown sugar",
+      "quantity": "1/2 cup (100 g)",
+      "unit": null
+    },
+    {
+      "name": "granulated sugar",
+      "quantity": "1/2 cup (100 g)",
+      "unit": null
+    },
+    {
+      "name": "large egg",
+      "quantity": 1,
+      "unit": "large"
+    },
+    {
+      "name": "vanilla extract",
+      "quantity": "1 tsp",
+      "unit": null
+    },
+    {
+      "name": "all-purpose flour",
+      "quantity": "1 1/4 cup (185 g)",
+      "unit": null
+    },
+    {
+      "name": "cornstarch",
+      "quantity": "1 Tbsp (7.5 g)",
+      "unit": null
+    },
+    {
+      "name": "baking soda",
+      "quantity": "1/2 tsp (2.5 g)",
+      "unit": null
+    },
+    {
+      "name": "salt",
+      "quantity": "1/2 tsp (2.5 g)",
+      "unit": null
+    },
+    {
+      "name": "chocolate chips",
+      "quantity": "1 1/2 cup (262 g)",
+      "unit": null
+    },
+    {
+      "name": " pecans",
+      "quantity": "1 cup (100 g)",
+      "unit": "lightly toasted, coarsely chopped (optional)"
+    }
+  ],
+  "instructions": [
+    "Cream the butter with the brown sugar and granulated sugar together well. Beat in the egg and the vanilla.",
+    "In a separate bowl, sift the flour with the cornstarch, baking soda and salt. Add this to the butter mixture and stir until blended. Stir in the chocolate chips and pecans (if using).",
+    "Using a small ice cream scoop or a tablespoon, scoop spoonfuls of dough (about 2 Tbsp) shape them into a ball and place onto a parchment lined baking tray or a plate. Chill the scooped cookies for at least an hour, or once chilled, the cookies can be frozen for baking later.",
+    "Preheat the oven to 325°F (162 C). Arrange the chilled scooped cookies onto parchment-lined baking trays, leaving 3 inches between the cookies. Bake for 15-18 minutes, until browned around the edges. Cool the cookies on the baking tray. If baking cookie dough that has been frozen, arrange the frozen cookies on the baking tray and let them thaw for 20 minutes at room temperature before baking as above.",
+    "Let cool slightly and enjoy."
+  ]
+}

@@ -3,7 +3,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from dotenv import load_dotenv
 from google import genai
@@ -19,13 +19,46 @@ class Ingredient(BaseModel):
     unit: str | None = None
 
 
+MetricSource = Literal["description", "transcript", "estimated", "user"]
+RecipeCategory = Literal["breakfast", "meal", "snack", "dessert", "drink", "holiday"]
+
+
+class SourcedServings(BaseModel):
+    """Serving count and the origin used to determine it."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    value: int | float = Field(description="Serving count extracted or cautiously estimated; never null.")
+    source: MetricSource
+
+
+class SourcedMinutes(BaseModel):
+    """Duration in minutes and the origin used to determine it."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    value: int | float = Field(
+        description="Positive duration in minutes extracted or cautiously estimated; never null."
+    )
+    source: MetricSource
+
+
+class SourcedCategory(BaseModel):
+    """Recipe category and the origin used to determine it."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    value: RecipeCategory | None = None
+    source: MetricSource
+
+
 class ParsedRecipe(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
-    servings: int | float | str | None = None
-    prep_time_minutes: int | float | None = None
-    cook_time_minutes: int | float | None = None
-    category: str | None = None
+    servings: SourcedServings
+    prep_time_minutes: SourcedMinutes
+    cook_time_minutes: SourcedMinutes
+    category: SourcedCategory
     ingredients: list[Ingredient] = Field(default_factory=list)
     instructions: list[str] = Field(default_factory=list)
 
@@ -35,7 +68,7 @@ class RecipeParsingError(RuntimeError):
 
 
 def parse_recipe(title: str, description: str) -> dict[str, Any]:
-    """Extract only facts present in the supplied title and description."""
+    """Parse a recipe from metadata while preserving each metric's provenance."""
     # Carrega a chave sem incluir credenciais no codigo-fonte.
     load_dotenv(Path(__file__).parents[1] / ".env")
     api_key = os.getenv("GEMINI_API_KEY")
@@ -45,13 +78,25 @@ def parse_recipe(title: str, description: str) -> dict[str, Any]:
         raise ValueError("A descricao da receita esta vazia; nao ha dados para extrair.")
 
     prompt = f"""
-        Extraia uma receita usando exclusivamente os fatos presentes no texto abaixo.
+        Extraia uma receita a partir do texto abaixo.
 
         Regras obrigatorias:
-        - Nunca invente ingredientes, quantidades, tempos, porcoes ou etapas.
-        - Use null para uma informacao ausente.
-        - Mantenha ingredients vazio e instructions vazio quando esses dados nao aparecerem.
-        - Nao interprete conhecimento culinario externo como fato.
+        - Para category, retorne sempre um objeto com value e source. Infira o value
+          usando somente: breakfast, meal, snack, dessert, drink ou holiday. Como a
+          categoria e inferida nesta solicitacao, use source "estimated".
+        - Para servings, prep_time_minutes e cook_time_minutes, retorne sempre um objeto
+          com value e source; value nunca pode ser null. Extraia o value quando ele
+          estiver explicito na descricao e use source "description". Quando nao estiver
+          explicito, obrigatoriamente faca uma estimativa cautelosa baseada somente no
+          titulo e na descricao e use source "estimated". Tempos devem ser numeros de
+          minutos positivos.
+        - As origens permitidas sao somente description, transcript, estimated e user.
+          Nesta solicitacao, nao ha transcript nem dado fornecido pelo usuario; portanto,
+          use apenas description ou estimated.
+        - Nunca invente ou estime ingredientes, quantidades, unidades ou instrucoes.
+          Para dados ausentes, use null nos campos opcionais do ingrediente e mantenha
+          ingredients ou instructions vazios quando nao houver itens na fonte.
+        - Nao interprete conhecimento culinario externo como ingrediente ou instrucao.
         - Retorne somente os campos definidos no schema.
 
         Titulo:

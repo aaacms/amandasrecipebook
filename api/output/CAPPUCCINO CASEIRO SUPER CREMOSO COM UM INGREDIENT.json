@@ -1,0 +1,62 @@
+{
+  "title": "CAPPUCCINO CASEIRO SUPER CREMOSO COM UM INGREDIENTE QUE VOCE NUNCA VIU!",
+  "source": {
+    "url": "https://www.youtube.com/watch?v=x10a22xEukU",
+    "author": "Ana Zambrin",
+    "platform": "youtube"
+  },
+  "servings": {
+    "value": 1,
+    "source": "estimated"
+  },
+  "prep_time_minutes": {
+    "value": 10,
+    "source": "estimated"
+  },
+  "cook_time_minutes": {
+    "value": 0,
+    "source": "estimated"
+  },
+  "category": {
+    "value": "drink",
+    "source": "estimated"
+  },
+  "ingredients": [
+    {
+      "name": "leite em pó",
+      "quantity": 200,
+      "unit": "g"
+    },
+    {
+      "name": "café solúvel",
+      "quantity": 25,
+      "unit": "g"
+    },
+    {
+      "name": "cacau 100%",
+      "quantity": 3,
+      "unit": "colheres de sopa"
+    },
+    {
+      "name": "açúcar",
+      "quantity": 0.5,
+      "unit": "xícara"
+    },
+    {
+      "name": "canela",
+      "quantity": 1,
+      "unit": "colher de café"
+    },
+    {
+      "name": "bicarbonato de sódio",
+      "quantity": 5,
+      "unit": "g"
+    },
+    {
+      "name": "chocolate em barra da sua preferência (amargo, ao leite ou branco)",
+      "quantity": 150,
+      "unit": "g"
+    }
+  ],
+  "instructions": []
+}
