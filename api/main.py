@@ -1,9 +1,11 @@
-"""Command-line entrypoint for recipe-extractor-cli."""
- 
+"""FastAPI application for extracting recipes from social-video URLs."""
+
 import json
 import re
-import sys
 from pathlib import Path
+
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel, HttpUrl
 
 from services.media_extractor import MediaExtractionError, extract_media_metadata
 from services.recipe_parser import RecipeParsingError, parse_recipe
@@ -11,9 +13,28 @@ from services.transcription import TranscriptionError, transcribe_url
 
 
 OUTPUT_DIRECTORY = Path(__file__).parent / "output"
+app = FastAPI(
+    title="Amanda's Recipe Book API",
+    version="1.0.0",
+    description="Extrai receitas estruturadas a partir de URLs de videos.",
+)
 
-# funcao auxiliar que transforma o titulo em um nome de arquivo seguro
+
+class RecipeRequest(BaseModel):
+    """URL publica do video que contem a receita."""
+
+    url: HttpUrl
+
+
+class RecipeResponse(BaseModel):
+    """Resultado da receita extraida e o local onde ela foi salva."""
+
+    recipe: dict
+    output_file: str
+
+
 def _safe_filename(title: str) -> str:
+    """Transforma o titulo em um nome de arquivo seguro no Windows."""
     filename = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", title).strip(" .")
     filename = filename or "receita"
     if filename.upper() in {"CON", "PRN", "AUX", "NUL"} or re.match(
@@ -22,40 +43,41 @@ def _safe_filename(title: str) -> str:
         filename = f"_{filename}"
     return f"{filename[:50]}.json"
 
-# recebe a URL, extrai os dados do vídeo, transforma em receita e salva em JSON
-def main() -> int:
-    url = input("Cole a URL da receita: ").strip()
-    # se a URL estiver vazia, retorna erro
-    if not url:
-        print("Erro: a URL nao pode estar vazia.", file=sys.stderr)
-        return 1
 
-    # tenta
+def extract_recipe(url: str) -> tuple[dict, Path]:
+    """Extract, parse and persist a recipe, returning it with its JSON path."""
+    media = extract_media_metadata(url)
+    recipe = parse_recipe(media["title"], media["description"])
+    if recipe["needs_transcription"]:
+        transcript = transcribe_url(media["webpage_url"])
+        recipe = parse_recipe(media["title"], media["description"], transcript)
+
+    document = {
+        "source": {
+            "url": media["webpage_url"],
+            "author": media["uploader"],
+            "platform": media["extractor"],
+        },
+        **recipe,
+    }
+    OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    output_path = OUTPUT_DIRECTORY / _safe_filename(document["title"])
+    output_path.write_text(
+        json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    return document, output_path
+
+
+@app.get("/health")
+def health_check() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+@app.post("/recipes", response_model=RecipeResponse, status_code=status.HTTP_201_CREATED)
+def create_recipe(payload: RecipeRequest) -> RecipeResponse:
+    """Extrai uma receita de uma URL de video publica."""
     try:
-        # Busca os metadados
-        media = extract_media_metadata(url)
-        recipe = parse_recipe(media["title"], media["description"])
-        if recipe["needs_transcription"]:
-            transcript = transcribe_url(media["webpage_url"])
-            recipe = parse_recipe(media["title"], media["description"], transcript)
-
-        # Combina a origem do video com os dados extraidos da receita.
-        document = {
-            "source": {
-                "url": media["webpage_url"],
-                "author": media["uploader"],
-                "platform": media["extractor"],
-            },
-            **recipe,
-        }
-
-        # Garante que a pasta exista e grava o JSON formatado.
-        OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-        output_path = OUTPUT_DIRECTORY / _safe_filename(document["title"])
-        output_path.write_text(
-            json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-    # trata os erros conhecidos
+        recipe, output_path = extract_recipe(str(payload.url))
     except (
         ValueError,
         MediaExtractionError,
@@ -63,12 +85,9 @@ def main() -> int:
         TranscriptionError,
         OSError,
     ) as error:
-        print(f"Erro: {error}", file=sys.stderr)
-        return 1
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
+        ) from error
 
-    print(f"Receita salva em: {output_path}")
-    return 0
-
-# Se este arquivo foi executado diretamente, execute main() e encerre com o return dela
-if __name__ == "__main__":
-    raise SystemExit(main())
+    relative_path = output_path.relative_to(Path(__file__).parent)
+    return RecipeResponse(recipe=recipe, output_file=str(relative_path))
