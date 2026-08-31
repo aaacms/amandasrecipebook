@@ -3,3 +3,6 @@ my-recipe-app/.env
 my-recipe-app/node_modules/
 my-recipe-app/dist/
 api/__pycache__/
+api/recipes.db
+api/recipes.db-shm
+api/recipes.db-wal

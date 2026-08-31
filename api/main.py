@@ -1,21 +1,20 @@
 """FastAPI application for extracting recipes from social-video URLs."""
 
-import json
 import os
-import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 
+from database import get_recipe, initialize_database, list_recipes, save_recipe
 from services.media_extractor import MediaExtractionError, extract_media_metadata
 from services.recipe_parser import RecipeParsingError, parse_recipe
 from services.transcription import TranscriptionError, transcribe_url
 
 
-OUTPUT_DIRECTORY = Path(__file__).parent / "output"
 FRONTEND_DIRECTORY = Path(__file__).parent.parent / "my-recipe-app" / "dist"
 FRONTEND_ORIGINS = os.getenv(
     "FRONTEND_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
@@ -42,25 +41,22 @@ class RecipeRequest(BaseModel):
 
 
 class RecipeResponse(BaseModel):
-    """Resultado da receita extraida e o local onde ela foi salva."""
+    """Resultado da receita extraida e seu identificador no banco de dados."""
 
     recipe: dict
-    output_file: str
+    recipe_id: int
 
 
-def _safe_filename(title: str) -> str:
-    """Transforma o titulo em um nome de arquivo seguro no Windows."""
-    filename = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", title).strip(" .")
-    filename = filename or "receita"
-    if filename.upper() in {"CON", "PRN", "AUX", "NUL"} or re.match(
-        r"^(COM|LPT)[0-9]$", filename.upper()
-    ):
-        filename = f"_{filename}"
-    return f"{filename[:50]}.json"
+class SavedRecipe(BaseModel):
+    """Recipe record returned by the SQLite collection."""
+
+    id: int
+    recipe: dict
+    created_at: str
 
 
-def extract_recipe(url: str) -> tuple[dict, Path]:
-    """Extract, parse and persist a recipe, returning it with its JSON path."""
+def extract_recipe(url: str) -> tuple[dict, int]:
+    """Extract, parse and persist a recipe, returning it with its database ID."""
     media = extract_media_metadata(url)
     recipe = parse_recipe(media["title"], media["description"])
     if recipe["needs_transcription"]:
@@ -75,12 +71,13 @@ def extract_recipe(url: str) -> tuple[dict, Path]:
         },
         **recipe,
     }
-    OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-    output_path = OUTPUT_DIRECTORY / _safe_filename(document["title"])
-    output_path.write_text(
-        json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    return document, output_path
+    return document, save_recipe(document)
+
+
+@app.on_event("startup")
+def create_database() -> None:
+    """Ensure SQLite is ready before accepting recipe imports."""
+    initialize_database()
 
 
 @app.get("/health")
@@ -92,7 +89,7 @@ def health_check() -> dict[str, str]:
 def create_recipe(payload: RecipeRequest) -> RecipeResponse:
     """Extrai uma receita de uma URL de video publica."""
     try:
-        recipe, output_path = extract_recipe(str(payload.url))
+        recipe, recipe_id = extract_recipe(str(payload.url))
     except (
         ValueError,
         MediaExtractionError,
@@ -104,8 +101,31 @@ def create_recipe(payload: RecipeRequest) -> RecipeResponse:
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)
         ) from error
 
-    relative_path = output_path.relative_to(Path(__file__).parent)
-    return RecipeResponse(recipe=recipe, output_file=str(relative_path))
+    return RecipeResponse(recipe=recipe, recipe_id=recipe_id)
+
+
+@app.get("/recipes", response_model=list[SavedRecipe])
+def get_recipes() -> list[dict]:
+    """List all recipes saved in SQLite, newest first."""
+    return list_recipes()
+
+
+@app.get("/recipes/{recipe_id}", response_model=SavedRecipe)
+def get_saved_recipe(recipe_id: int) -> dict:
+    """Return one saved recipe by its database ID."""
+    recipe = get_recipe(recipe_id)
+    if recipe is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Receita não encontrada.")
+    return recipe
+
+
+@app.get("/recipe/{recipe_id}", include_in_schema=False)
+def recipe_page(recipe_id: int) -> FileResponse:
+    """Serve the front-end detail page while keeping its URL shareable."""
+    index_file = FRONTEND_DIRECTORY / "index.html"
+    if not index_file.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Front-end não encontrado.")
+    return FileResponse(index_file)
 
 
 # Em producao, o FastAPI tambem entrega o build do Vite. Monte isto por ultimo
