@@ -1,0 +1,49 @@
+{
+  "source": {
+    "url": "https://www.pinterest.com/pin/291045194692703468/",
+    "author": "🪷",
+    "platform": "Pinterest"
+  },
+  "title": "Pasta Vegana de Pinaca",
+  "needs_transcription": false,
+  "servings": {
+    "value": 2,
+    "source": "estimated"
+  },
+  "prep_time_minutes": {
+    "value": 15,
+    "source": "estimated"
+  },
+  "cook_time_minutes": {
+    "value": 15,
+    "source": "estimated"
+  },
+  "category": {
+    "value": "meal",
+    "source": "estimated"
+  },
+  "ingredients": [
+    {
+      "name": "pinaca",
+      "quantity": 200,
+      "unit": "gramas"
+    },
+    {
+      "name": "harina",
+      "quantity": 300,
+      "unit": "gramas"
+    },
+    {
+      "name": "aceite de oliva",
+      "quantity": null,
+      "unit": null
+    }
+  ],
+  "instructions": [
+    "Todo eso lo procesas.",
+    "Lo tiras a la mesa, unisto, los ingredientes no se falta masar y te quedas esta masa de pinaca tremenda.",
+    "Simplemente lo cortas con tijeras y formas irregulares.",
+    "Para la salsa simplemente un poquito de aceite de oliva, saltez un poquito de la ajo, tiras la pasta recién cocinada, los tomates cherry, un poco de al vaca y eso es todo.",
+    "le pusimos un poco de agua de la cocción."
+  ]
+}

@@ -1,10 +1,13 @@
 """FastAPI application for extracting recipes from social-video URLs."""
 
 import json
+import os
 import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 
 from services.media_extractor import MediaExtractionError, extract_media_metadata
@@ -13,10 +16,22 @@ from services.transcription import TranscriptionError, transcribe_url
 
 
 OUTPUT_DIRECTORY = Path(__file__).parent / "output"
+FRONTEND_DIRECTORY = Path(__file__).parent.parent / "my-recipe-app" / "dist"
+FRONTEND_ORIGINS = os.getenv(
+    "FRONTEND_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+).split(",")
 app = FastAPI(
     title="Amanda's Recipe Book API",
     version="1.0.0",
     description="Extrai receitas estruturadas a partir de URLs de videos.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in FRONTEND_ORIGINS if origin.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -91,3 +106,9 @@ def create_recipe(payload: RecipeRequest) -> RecipeResponse:
 
     relative_path = output_path.relative_to(Path(__file__).parent)
     return RecipeResponse(recipe=recipe, output_file=str(relative_path))
+
+
+# Em producao, o FastAPI tambem entrega o build do Vite. Monte isto por ultimo
+# para que as rotas da API acima continuem tendo prioridade.
+if FRONTEND_DIRECTORY.is_dir():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIRECTORY, html=True), name="frontend")
