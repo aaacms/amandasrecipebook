@@ -1,0 +1,5 @@
+api/.env
+my-recipe-app/.env
+my-recipe-app/node_modules/
+my-recipe-app/dist/
+api/__pycache__/

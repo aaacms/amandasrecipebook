@@ -17,37 +17,12 @@ app.innerHTML = `
         <p class="mb-2 text-sm font-semibold text-orange-600">Nova receita</p>
         <h2 id="import-title" class="text-2xl font-bold tracking-tight sm:text-3xl">Importe uma receita da web</h2>
         <p class="mt-3 text-stone-600">Cole o link de uma receita para salvá-la no seu livro.</p>
-
         <form id="recipe-import-form" class="mt-7 flex flex-col gap-3 sm:flex-row" novalidate>
           <label class="sr-only" for="recipe-url">URL da receita</label>
-          <input
-            id="recipe-url"
-            name="recipeUrl"
-            type="url"
-            inputmode="url"
-            placeholder="https://exemplo.com/minha-receita"
-            required
-            class="min-w-0 flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-          />
-          <button type="submit" class="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-200 active:bg-orange-700">
-            Importar receita
-          </button>
+          <input id="recipe-url" name="recipeUrl" type="url" inputmode="url" placeholder="https://exemplo.com/minha-receita" required class="min-w-0 flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100" />
+          <button type="submit" class="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-200 active:bg-orange-700 disabled:cursor-wait disabled:opacity-70">Importar receita</button>
         </form>
         <p id="form-message" class="mt-3 hidden text-sm" role="status"></p>
-      </div>
-    </section>
-
-    <section class="mx-auto mt-14 w-full max-w-2xl" aria-labelledby="saved-recipes-title">
-      <div class="flex items-center justify-between gap-4">
-        <div>
-          <p class="text-sm font-semibold text-orange-600">Sua coleção</p>
-          <h2 id="saved-recipes-title" class="text-2xl font-bold tracking-tight">Receitas salvas</h2>
-        </div>
-        <span class="rounded-full bg-stone-200 px-3 py-1 text-sm font-medium text-stone-600">Em breve</span>
-      </div>
-      <div class="mt-5 rounded-3xl border border-dashed border-stone-300 bg-white/60 px-6 py-12 text-center">
-        <p class="text-lg font-semibold">Sua coleção aparecerá aqui.</p>
-        <p class="mt-2 text-sm text-stone-600">Importe sua primeira receita usando o campo acima.</p>
       </div>
     </section>
   </main>
@@ -56,8 +31,12 @@ app.innerHTML = `
 const form = document.querySelector('#recipe-import-form')
 const urlInput = document.querySelector('#recipe-url')
 const message = document.querySelector('#form-message')
+const submitButton = form.querySelector('button[type="submit"]')
+const apiBaseUrl = (
+  import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? '/api' : '')
+).replace(/\/$/, '')
 
-form.addEventListener('submit', (event) => {
+form.addEventListener('submit', async (event) => {
   event.preventDefault()
 
   if (!urlInput.checkValidity()) {
@@ -67,7 +46,31 @@ form.addEventListener('submit', (event) => {
     return
   }
 
-  // Futuramente, envie esta URL para a API FastAPI responsável pela importação.
-  message.textContent = 'A importação será conectada à API em breve.'
-  message.className = 'mt-3 text-sm text-emerald-700'
+  submitButton.disabled = true
+  submitButton.textContent = 'Importando...'
+  message.textContent = 'Estamos extraindo a receita. Isso pode levar alguns instantes.'
+  message.className = 'mt-3 text-sm text-stone-600'
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/recipes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: urlInput.value.trim() }),
+    })
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'Não foi possível importar esta receita.')
+    }
+
+    message.textContent = `Receita “${data.recipe.title}” importada com sucesso!`
+    message.className = 'mt-3 text-sm text-emerald-700'
+    urlInput.value = ''
+  } catch (error) {
+    message.textContent = error.message || 'Não foi possível conectar à API.'
+    message.className = 'mt-3 text-sm text-red-600'
+  } finally {
+    submitButton.disabled = false
+    submitButton.textContent = 'Importar receita'
+  }
 })
