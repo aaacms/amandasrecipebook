@@ -7,6 +7,7 @@ from pathlib import Path
 
 from services.media_extractor import MediaExtractionError, extract_media_metadata
 from services.recipe_parser import RecipeParsingError, parse_recipe
+from services.transcription import TranscriptionError, transcribe_url
 
 
 OUTPUT_DIRECTORY = Path(__file__).parent / "output"
@@ -34,6 +35,9 @@ def main() -> int:
         # Busca os metadados
         media = extract_media_metadata(url)
         recipe = parse_recipe(media["title"], media["description"])
+        if recipe["needs_transcription"]:
+            transcript = transcribe_url(media["webpage_url"])
+            recipe = parse_recipe(media["title"], media["description"], transcript)
 
         # Combina a origem do video com os dados extraidos da receita.
         document = {
@@ -52,7 +56,13 @@ def main() -> int:
             json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
         )
     # trata os erros conhecidos
-    except (ValueError, MediaExtractionError, RecipeParsingError, OSError) as error:
+    except (
+        ValueError,
+        MediaExtractionError,
+        RecipeParsingError,
+        TranscriptionError,
+        OSError,
+    ) as error:
         print(f"Erro: {error}", file=sys.stderr)
         return 1
 

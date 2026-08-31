@@ -1,0 +1,72 @@
+{
+  "source": {
+    "url": "https://www.instagram.com/reel/DXhMSnSDchv/?igsi=MXh2bmM5ZWs0NTVwNg==",
+    "author": "Vítor Porpino",
+    "platform": "Instagram"
+  },
+  "title": "Salgadinho de Arroz Sem Glúten e Sem Lactose",
+  "needs_transcription": false,
+  "servings": {
+    "value": 2,
+    "source": "estimated"
+  },
+  "prep_time_minutes": {
+    "value": 10,
+    "source": "estimated"
+  },
+  "cook_time_minutes": {
+    "value": 20,
+    "source": "estimated"
+  },
+  "category": {
+    "value": "snack",
+    "source": "estimated"
+  },
+  "ingredients": [
+    {
+      "name": "arroz cozido",
+      "quantity": 200,
+      "unit": "gramas"
+    },
+    {
+      "name": "água",
+      "quantity": 310,
+      "unit": "ml"
+    },
+    {
+      "name": "azeite",
+      "quantity": 20,
+      "unit": "gramas"
+    },
+    {
+      "name": "sal",
+      "quantity": null,
+      "unit": null
+    },
+    {
+      "name": "orégano",
+      "quantity": null,
+      "unit": null
+    },
+    {
+      "name": "páprica",
+      "quantity": "uma pitada",
+      "unit": null
+    },
+    {
+      "name": "fermento químico",
+      "quantity": 10,
+      "unit": "gramas"
+    }
+  ],
+  "instructions": [
+    "Bata tudo no liquidificador até formar uma mistura bem homogênea.",
+    "Acrescente o fermento químico.",
+    "Em uma frigideira antiaderente, faça pequenas panquecas bem fininhas.",
+    "Tampe e espere.",
+    "Quando a parte de cima estiver firme, destampe e espere ela se soltar.",
+    "Repita o processo com toda a massa.",
+    "Corte no formato de pizza.",
+    "Leve ao forno a 160 graus por 10 minutos para ficar super crocante."
+  ]
+}

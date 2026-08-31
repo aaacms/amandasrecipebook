@@ -56,6 +56,7 @@ class ParsedRecipe(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     title: str
+    needs_transcription: bool
     servings: SourcedServings
     prep_time_minutes: SourcedMinutes
     cook_time_minutes: SourcedMinutes
@@ -68,15 +69,21 @@ class RecipeParsingError(RuntimeError):
     """Raised when Gemini cannot parse a recipe description."""
 
 
-def parse_recipe(title: str, description: str) -> dict[str, Any]:
+def parse_recipe(
+    title: str, description: str, transcript: str | None = None
+) -> dict[str, Any]:
     """Parse a recipe from metadata while preserving each metric's provenance."""
     # Carrega a chave sem incluir credenciais no codigo-fonte.
     load_dotenv(Path(__file__).parents[1] / ".env")
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise RecipeParsingError("GEMINI_API_KEY nao foi encontrada no arquivo .env.")
-    if not description.strip():
-        raise ValueError("A descricao da receita esta vazia; nao ha dados para extrair.")
+    transcript_section = ""
+    if transcript:
+        transcript_section = f"""
+        Transcricao do audio:
+        {transcript}
+        """
 
     prompt = f"""
         Extraia uma receita a partir do texto abaixo.
@@ -101,6 +108,11 @@ def parse_recipe(title: str, description: str) -> dict[str, Any]:
           Para dados ausentes, use null nos campos opcionais do ingrediente e mantenha
           ingredients ou instructions vazios quando nao houver itens na fonte.
         - Nao interprete conhecimento culinario externo como ingrediente ou instrucao.
+        - Retorne needs_transcription como true quando a descricao, por si so, nao tiver
+          informacoes suficientes para montar corretamente ingredientes e instrucoes da
+          receita. Quando uma transcricao for fornecida, use-a como fonte adicional,
+          marque dados dela com source "transcript" e retorne needs_transcription como
+          false, pois o fallback ja foi executado.
         - Retorne somente os campos definidos no schema.
 
         Titulo:
@@ -108,6 +120,7 @@ def parse_recipe(title: str, description: str) -> dict[str, Any]:
 
         Descricao:
         {description}
+        {transcript_section}
     """
 
     try:

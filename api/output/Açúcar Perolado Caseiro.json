@@ -1,0 +1,50 @@
+{
+  "source": {
+    "url": "https://www.instagram.com/reel/DYmjTJFqb60/?igsi=NXVpYmdocXFrY3Yy",
+    "author": "Adda Ritzel | Cozinha & Criações",
+    "platform": "Instagram"
+  },
+  "title": "Açúcar Perolado Caseiro",
+  "needs_transcription": false,
+  "servings": {
+    "value": 1,
+    "source": "estimated"
+  },
+  "prep_time_minutes": {
+    "value": 10,
+    "source": "estimated"
+  },
+  "cook_time_minutes": {
+    "value": 1440,
+    "source": "estimated"
+  },
+  "category": {
+    "value": "snack",
+    "source": "estimated"
+  },
+  "ingredients": [
+    {
+      "name": "açúcar impalpável",
+      "quantity": 100,
+      "unit": "gramas"
+    },
+    {
+      "name": "água",
+      "quantity": 10,
+      "unit": "ml"
+    },
+    {
+      "name": "amido",
+      "quantity": null,
+      "unit": null
+    }
+  ],
+  "instructions": [
+    "Misturar 100 gramas de açúcar impalpável e 10 ml de água dentro de um saquinho até ficar amaciado e empelotado.",
+    "Vilhar amido sobre a bancada.",
+    "Colocar a massa entre duas folhas e abrir com um rolo na espessura desejada.",
+    "Fazer cortes com espátula, faca ou pedaço de tecla para criar pequenos pedaços.",
+    "Transferir para uma forma, desfazendo os pedaços maiores e adicionando mais amido se precisar.",
+    "Deixar o açúcar secando de um dia para o outro, dentro do forno apenas com a luz acesa."
+  ]
+}

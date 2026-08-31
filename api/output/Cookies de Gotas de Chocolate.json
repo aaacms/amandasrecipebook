@@ -1,10 +1,11 @@
 {
-  "title": "Cookies de Gotas de Chocolate",
   "source": {
     "url": "https://www.youtube.com/watch?v=uJwekkbGPns",
     "author": "Oh Yum with Anna Olson",
     "platform": "youtube"
   },
+  "title": "Cookies de Gotas de Chocolate",
+  "needs_transcription": false,
   "servings": {
     "value": 12,
     "source": "estimated"
@@ -23,57 +24,57 @@
   },
   "ingredients": [
     {
-      "name": "manteiga sem sal",
+      "name": "unsalted butter",
       "quantity": 0.5,
       "unit": "cup"
     },
     {
-      "name": "açúcar mascavo claro",
+      "name": "packed light brown sugar",
       "quantity": 0.5,
       "unit": "cup"
     },
     {
-      "name": "açúcar granulado",
+      "name": "granulated sugar",
       "quantity": 0.5,
-      "unit": "unit"
+      "unit": "cup"
     },
     {
-      "name": "ovo grande",
+      "name": "egg",
       "quantity": 1,
-      "unit": "unit"
+      "unit": "large"
     },
     {
-      "name": "extrato de baunilha",
+      "name": "vanilla extract",
       "quantity": 1,
       "unit": "tsp"
     },
     {
-      "name": "farinha de trigo",
+      "name": "all-purpose flour",
       "quantity": 1.25,
       "unit": "cup"
     },
     {
-      "name": "amido de milho",
+      "name": "cornstarch",
       "quantity": 1,
       "unit": "Tbsp"
     },
     {
-      "name": "bicarbonato de sódio",
+      "name": "baking soda",
       "quantity": 0.5,
       "unit": "tsp"
     },
     {
-      "name": "sal",
+      "name": "salt",
       "quantity": 0.5,
       "unit": "tsp"
     },
     {
-      "name": "gotas de chocolate",
+      "name": "chocolate chips",
       "quantity": 1.5,
       "unit": "cup"
     },
     {
-      "name": "nozes pecã torradas e picadas",
+      "name": "lightly toasted, coarsely chopped pecans",
       "quantity": 1,
       "unit": "cup"
     }
@@ -82,7 +83,7 @@
     "Cream the butter with the brown sugar and granulated sugar together well. Beat in the egg and the vanilla.",
     "In a separate bowl, sift the flour with the cornstarch, baking soda and salt. Add this to the butter mixture and stir until blended. Stir in the chocolate chips and pecans (if using).",
     "Using a small ice cream scoop or a tablespoon, scoop spoonfuls of dough (about 2 Tbsp) shape them into a ball and place onto a parchment lined baking tray or a plate. Chill the scooped cookies for at least an hour, or once chilled, the cookies can be frozen for baking later.",
-    "Preheat the oven to 325°F (162 C). Arrange the chilled scooped cookies onto parchment-lined baking trays, leaving 3 inches between the cookies. Bake for 15-18 minutes, until browned around the edges. Cool the cookies on the baking tray. If baking cookie dough that has been frozen, arrange the frozen cookies on the baking tray and let them thaw for 20 minutes at room temperature before baking as above.",
+    "Preheat the oven to 325ºF (162 C). Arrange the chilled scooped cookies onto parchment-lined baking trays, leaving 3 inches between the cookies. Bake for 15-18 minutes, until browned around the edges. Cool the cookies on the baking tray. If baking cookie dough that has been frozen, arrange the frozen cookies on the baking tray and let them thaw for 20 minutes at room temperature before baking as above.",
     "Let cool slightly and enjoy."
   ]
 }
