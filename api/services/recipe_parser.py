@@ -55,6 +55,7 @@ class SourcedCategory(BaseModel):
 class ParsedRecipe(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
+    title: str
     servings: SourcedServings
     prep_time_minutes: SourcedMinutes
     cook_time_minutes: SourcedMinutes
@@ -81,6 +82,9 @@ def parse_recipe(title: str, description: str) -> dict[str, Any]:
         Extraia uma receita a partir do texto abaixo.
 
         Regras obrigatorias:
+        - Gere title como um nome curto, claro e apetitoso para a receita, em portugues.
+          Baseie-se somente no titulo e na descricao fornecidos, sem atribuir ingredientes,
+          tecnicas ou caracteristicas que nao aparecam neles.
         - Para category, retorne sempre um objeto com value e source. Infira o value
           usando somente: breakfast, meal, snack, dessert, drink ou holiday. Como a
           categoria e inferida nesta solicitacao, use source "estimated".

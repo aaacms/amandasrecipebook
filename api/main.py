@@ -37,7 +37,6 @@ def main() -> int:
 
         # Combina a origem do video com os dados extraidos da receita.
         document = {
-            "title": media["title"],
             "source": {
                 "url": media["webpage_url"],
                 "author": media["uploader"],
@@ -48,7 +47,7 @@ def main() -> int:
 
         # Garante que a pasta exista e grava o JSON formatado.
         OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
-        output_path = OUTPUT_DIRECTORY / _safe_filename(media["title"])
+        output_path = OUTPUT_DIRECTORY / _safe_filename(document["title"])
         output_path.write_text(
             json.dumps(document, ensure_ascii=False, indent=2), encoding="utf-8"
         )
