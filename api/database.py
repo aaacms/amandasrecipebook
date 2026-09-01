@@ -78,3 +78,26 @@ def get_recipe(recipe_id: int) -> dict | None:
     if row is None:
         return None
     return {"id": row[0], "recipe": json.loads(row[1]), "created_at": row[2]}
+
+
+def update_recipe(recipe_id: int, recipe: dict) -> bool:
+    """Replace a saved recipe and keep searchable columns in sync."""
+    source = recipe["source"]
+    with sqlite3.connect(DATABASE_PATH) as connection:
+        cursor = connection.execute(
+            """
+            UPDATE recipes
+            SET title = ?, source_url = ?, source_author = ?, source_platform = ?,
+                recipe_json = ?
+            WHERE id = ?
+            """,
+            (
+                recipe["title"],
+                source["url"],
+                source.get("author"),
+                source.get("platform"),
+                json.dumps(recipe, ensure_ascii=False),
+                recipe_id,
+            ),
+        )
+    return cursor.rowcount == 1

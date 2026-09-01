@@ -139,6 +139,78 @@ function renderRecipeDetail(savedRecipe) {
     link.textContent = 'Ver publicação original ↗'
     source.append(link)
   }
+  const editButton = document.createElement('button')
+  editButton.type = 'button'
+  editButton.className = 'mt-8 rounded-xl border border-orange-300 px-4 py-2 font-semibold text-orange-700 transition hover:bg-orange-50'
+  editButton.textContent = 'Editar receita'
+  editButton.addEventListener('click', () => renderEditForm(savedRecipe))
+  document.querySelector('article').append(editButton)
+}
+
+function renderEditForm(savedRecipe) {
+  const { recipe } = savedRecipe
+  app.innerHTML = `<main class="mx-auto min-h-screen w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12"><button id="cancel-edit" class="text-sm font-semibold text-orange-600 hover:text-orange-700">← Cancelar edição</button><form id="edit-recipe-form" class="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-10"><p class="text-sm font-semibold text-orange-600">Editar receita</p><h1 class="mt-2 text-3xl font-bold tracking-tight">Informações da receita</h1><div class="mt-8 grid gap-5"><label class="grid gap-1 font-semibold">Título<input id="edit-title" required class="rounded-xl border border-stone-300 px-3 py-2 font-normal" /></label><label class="grid gap-1 font-semibold">Categoria<select id="edit-category" class="rounded-xl border border-stone-300 px-3 py-2 font-normal"><option value="breakfast">Café da manhã</option><option value="meal">Refeição</option><option value="snack">Lanche</option><option value="dessert">Sobremesa</option><option value="drink">Bebida</option><option value="holiday">Data especial</option></select></label><div class="grid gap-4 sm:grid-cols-3"><div><label class="font-semibold" for="edit-servings">Porções</label><input id="edit-servings" type="number" min="0" step="any" class="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2" /><select id="edit-servings-source" class="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2"></select></div><div><label class="font-semibold" for="edit-prep">Preparo (min)</label><input id="edit-prep" type="number" min="0" step="any" class="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2" /><select id="edit-prep-source" class="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2"></select></div><div><label class="font-semibold" for="edit-cook">Cozimento (min)</label><input id="edit-cook" type="number" min="0" step="any" class="mt-1 w-full rounded-xl border border-stone-300 px-3 py-2" /><select id="edit-cook-source" class="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2"></select></div></div><p class="-mt-3 text-sm text-stone-500">Em cada campo, escolha também a origem do dado.</p><label class="grid gap-1 font-semibold">Ingredientes <span class="font-normal text-stone-500">Um por linha: quantidade | unidade | nome</span><textarea id="edit-ingredients" rows="6" class="rounded-xl border border-stone-300 px-3 py-2 font-normal"></textarea></label><label class="grid gap-1 font-semibold">Modo de preparo <span class="font-normal text-stone-500">Um passo por linha</span><textarea id="edit-instructions" rows="6" class="rounded-xl border border-stone-300 px-3 py-2 font-normal"></textarea></label><h2 class="mt-4 text-xl font-bold">Origem e imagem</h2><label class="grid gap-1 font-semibold">URL da publicação<input id="edit-source-url" type="url" required class="rounded-xl border border-stone-300 px-3 py-2 font-normal" /></label><label class="grid gap-1 font-semibold">Autor<input id="edit-author" class="rounded-xl border border-stone-300 px-3 py-2 font-normal" /></label><label class="grid gap-1 font-semibold">Plataforma<input id="edit-platform" class="rounded-xl border border-stone-300 px-3 py-2 font-normal" /></label><label class="grid gap-1 font-semibold">URL da imagem/thumbnail<input id="edit-thumbnail" type="url" class="rounded-xl border border-stone-300 px-3 py-2 font-normal" /></label><p id="edit-message" class="hidden text-sm" role="status"></p><button class="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white hover:bg-orange-600 disabled:opacity-70">Salvar alterações</button></div></form></main>`
+  const sources = ['description', 'transcript', 'estimated', 'user']
+  const setMetric = (name, metric) => {
+    const input = document.querySelector(`#edit-${name}`)
+    const select = document.querySelector(`#edit-${name}-source`)
+    input.value = metric?.value ?? ''
+    sources.forEach((source) => select.add(new Option(source, source)))
+    select.value = metric?.source || 'user'
+    select.remove()
+  }
+  document.querySelector('#edit-title').value = recipe.title || ''
+  document.querySelector('#edit-category').value = recipe.category?.value || 'meal'
+  setMetric('servings', recipe.servings)
+  setMetric('prep', recipe.prep_time_minutes)
+  setMetric('cook', recipe.cook_time_minutes)
+  Array.from(document.querySelectorAll('p')).find((element) => element.textContent.includes('Em cada campo'))?.remove()
+  document.querySelector('#edit-ingredients').value = (recipe.ingredients || []).map((item) => [item.quantity ?? '', item.unit ?? '', item.name ?? ''].join(' | ')).join('\n')
+  document.querySelector('#edit-instructions').value = (recipe.instructions || []).join('\n')
+  document.querySelector('#edit-source-url').value = recipe.source?.url || ''
+  document.querySelector('#edit-author').value = recipe.source?.author || ''
+  document.querySelector('#edit-platform').value = recipe.source?.platform || ''
+  document.querySelector('#edit-thumbnail').value = recipe.source?.thumbnail || ''
+  document.querySelector('#cancel-edit').addEventListener('click', () => renderRecipeDetail(savedRecipe))
+  document.querySelector('#edit-recipe-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const metric = (name, originalMetric) => {
+      const value = document.querySelector(`#edit-${name}`).value
+      const parsedValue = value === '' ? null : Number(value)
+      const unchanged = parsedValue === (originalMetric?.value ?? null)
+      return { value: parsedValue, source: unchanged ? (originalMetric?.source || 'user') : 'user' }
+    }
+    const ingredients = document.querySelector('#edit-ingredients').value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
+      const [quantity = '', unit = '', ...name] = line.split('|').map((part) => part.trim())
+      const numericQuantity = Number(quantity)
+      return { quantity: quantity === '' ? null : (Number.isNaN(numericQuantity) ? quantity : numericQuantity), unit: unit || null, name: name.join(' | ') }
+    }).filter((item) => item.name)
+    const updated = structuredClone(recipe)
+    updated.title = document.querySelector('#edit-title').value.trim()
+    const categoryValue = document.querySelector('#edit-category').value
+    updated.category = { value: categoryValue, source: categoryValue === recipe.category?.value ? (recipe.category?.source || 'user') : 'user' }
+    updated.servings = metric('servings', recipe.servings)
+    updated.prep_time_minutes = metric('prep', recipe.prep_time_minutes)
+    updated.cook_time_minutes = metric('cook', recipe.cook_time_minutes)
+    updated.ingredients = ingredients
+    updated.instructions = document.querySelector('#edit-instructions').value.split('\n').map((line) => line.trim()).filter(Boolean)
+    updated.source = { url: document.querySelector('#edit-source-url').value.trim(), author: document.querySelector('#edit-author').value.trim() || null, platform: document.querySelector('#edit-platform').value.trim() || null, thumbnail: document.querySelector('#edit-thumbnail').value.trim() || null }
+    const button = event.currentTarget.querySelector('button')
+    const message = document.querySelector('#edit-message')
+    button.disabled = true
+    button.textContent = 'Salvando...'
+    try {
+      const response = await fetch(`${apiBaseUrl}/recipes/${savedRecipe.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recipe: updated }) })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.detail || 'Não foi possível salvar a receita.')
+      renderRecipeDetail(data)
+    } catch (error) {
+      message.textContent = error.message
+      message.className = 'text-sm text-red-600'
+      button.disabled = false
+      button.textContent = 'Salvar alterações'
+    }
+  })
 }
 
 async function loadRecipeDetail(id) {
