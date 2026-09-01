@@ -68,6 +68,7 @@ def extract_recipe(url: str) -> tuple[dict, int]:
             "url": media["webpage_url"],
             "author": media["uploader"],
             "platform": media["extractor"],
+            "thumbnail": media.get("thumbnail"),
         },
         **recipe,
     }

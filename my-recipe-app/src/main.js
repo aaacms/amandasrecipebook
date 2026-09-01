@@ -18,6 +18,15 @@ function recipeCard(savedRecipe) {
   card.querySelectorAll('p')[0].textContent = categoryLabel(recipe.category)
   card.querySelector('h3').textContent = recipe.title
   card.querySelectorAll('p')[1].textContent = `${count} ingrediente${count === 1 ? '' : 's'}${recipe.source?.author ? ` · ${recipe.source.author}` : ''}`
+  if (recipe.source?.thumbnail) {
+    const image = document.createElement('img')
+    image.src = recipe.source.thumbnail
+    image.alt = `Imagem da receita ${recipe.title}`
+    image.loading = 'lazy'
+    image.className = 'mb-4 aspect-video w-full rounded-xl bg-stone-100 object-cover'
+    image.addEventListener('error', () => image.remove())
+    card.prepend(image)
+  }
   return card
 }
 
@@ -98,9 +107,17 @@ function textList(element, values, emptyText, numbered = false) {
 
 function renderRecipeDetail(savedRecipe) {
   const { recipe } = savedRecipe
-  app.innerHTML = `<main class="mx-auto min-h-screen w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12"><a href="/" class="inline-flex text-sm font-semibold text-orange-600 hover:text-orange-700">← Voltar ao livro</a><article class="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-10"><p id="category" class="text-sm font-semibold text-orange-600"></p><h1 class="mt-2 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl"></h1><div id="facts" class="mt-6 flex flex-wrap gap-3"></div><section class="mt-10"><h2 class="text-xl font-bold">Ingredientes</h2><ul id="ingredients" class="mt-4 space-y-2 text-stone-700"></ul></section><section class="mt-10"><h2 class="text-xl font-bold">Modo de preparo</h2><ol id="instructions" class="mt-4 space-y-3 text-stone-700"></ol></section><section class="mt-10 border-t border-stone-200 pt-6"><h2 class="text-lg font-bold">Origem</h2><p id="source" class="mt-2 text-sm text-stone-600"></p></section></article></main>`
+  app.innerHTML = `<main class="mx-auto min-h-screen w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-12"><a href="/" class="inline-flex text-sm font-semibold text-orange-600 hover:text-orange-700">← Voltar ao livro</a><article class="mt-8 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-10"><div id="thumbnail"></div><p id="category" class="text-sm font-semibold text-orange-600"></p><h1 class="mt-2 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl"></h1><div id="facts" class="mt-6 flex flex-wrap gap-3"></div><section class="mt-10"><h2 class="text-xl font-bold">Ingredientes</h2><ul id="ingredients" class="mt-4 space-y-2 text-stone-700"></ul></section><section class="mt-10"><h2 class="text-xl font-bold">Modo de preparo</h2><ol id="instructions" class="mt-4 space-y-3 text-stone-700"></ol></section><section class="mt-10 border-t border-stone-200 pt-6"><h2 class="text-lg font-bold">Origem</h2><p id="source" class="mt-2 text-sm text-stone-600"></p></section></article></main>`
   document.querySelector('#category').textContent = categoryLabel(recipe.category)
   document.querySelector('h1').textContent = recipe.title
+  if (recipe.source?.thumbnail) {
+    const image = document.createElement('img')
+    image.src = recipe.source.thumbnail
+    image.alt = `Imagem da receita ${recipe.title}`
+    image.className = 'mb-8 aspect-video w-full rounded-2xl bg-stone-100 object-cover'
+    image.addEventListener('error', () => image.remove())
+    document.querySelector('#thumbnail').append(image)
+  }
   const minutes = (metric) => metric?.value === null || metric?.value === undefined ? null : `${metric.value} min`
   const facts = [['Porções', recipe.servings?.value], ['Preparo', minutes(recipe.prep_time_minutes)], ['Cozimento', minutes(recipe.cook_time_minutes)]]
   facts.filter(([, value]) => value !== null && value !== undefined).forEach(([label, value]) => {
